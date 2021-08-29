@@ -5,12 +5,12 @@ import os
 
 class PcapplusplusConan(ConanFile):
     name = "pcapplusplus"
-    version = "21.05"
+    version = "ns1-dev"
     license = "Unlicense"
     description = "PcapPlusPlus is a multiplatform C++ library for capturing, parsing and crafting of network packets"
     topics = ("conan", "pcapplusplus", "pcap", "network", "security", "packet")
     url = "https://github.com/ns1labs/conan-pcapplusplus"
-    homepage = "https://github.com/seladb/PcapPlusPlus"
+    homepage = "https://github.com/ns1labs/PcapPlusPlus"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False], 
@@ -51,10 +51,8 @@ class PcapplusplusConan(ConanFile):
             self.requires("libpcap/1.9.1")
             
     def source(self):
-        sha256 = "f7bc2caea72544f42e3547c8acf65fca07ddd4cd45f7be2f5132dd1826ea27bb"
-        tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version), sha256=sha256)
-        extracted_dir = self._source_subfolder + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        git = tools.Git(folder=self._source_subfolder)
+        git.clone(self.homepage, 'dev')
 
     def build(self):
         with tools.chdir(self._source_subfolder):
