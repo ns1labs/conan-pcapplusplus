@@ -16,11 +16,13 @@ class PcapplusplusConan(ConanFile):
         "shared": [True, False], 
         "fPIC": [True, False],
         "immediate_mode": [True, False],
+        "with_musl": [True, False],
     }
     default_options = {
         "shared": False, 
         "fPIC": True,
         "immediate_mode": False,
+        "with_musl": False,
     }
     generators = "make", "visual_studio"
 
@@ -41,6 +43,8 @@ class PcapplusplusConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
             del self.options.immediate_mode
+        if self.settings.os != 'Linux':
+            del self.options.with_musl
     
     def requirements(self):
         if self.settings.os == 'Windows':
@@ -62,6 +66,8 @@ class PcapplusplusConan(ConanFile):
                 config_command = ("./configure-linux.sh --libpcap-include-dir %s --libpcap-lib-dir %s" % (libpcap_include_path, libpcap_lib_path))
                 if self.options.immediate_mode:
                     config_command += " --use-immediate-mode"
+                if self.options.with_musl:
+                    config_command += " --musl"
 
                 self.run(config_command)
 
