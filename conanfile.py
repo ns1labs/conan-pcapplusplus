@@ -48,7 +48,7 @@ class PcapplusplusConan(ConanFile):
     
     def requirements(self):
         if self.settings.os == 'Windows':
-            self.requires("winpcap/4.1.3@bincrafters/stable")
+            self.requires("winpcap/4.1.3")
             if self.settings.compiler == "Visual Studio":
                 self.requires("pthreads4w/3.0.0")
         else:
