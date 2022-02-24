@@ -5,6 +5,7 @@ import os
 
 class PcapplusplusConan(ConanFile):
     name = "pcapplusplus"
+    version = "ns1-upstream"
     license = "Unlicense"
     description = "PcapPlusPlus is a multiplatform C++ library for capturing, parsing and crafting of network packets"
     topics = ("conan", "pcapplusplus", "pcap", "network", "security", "packet")
@@ -55,10 +56,7 @@ class PcapplusplusConan(ConanFile):
 
     def source(self):
         git = tools.Git(folder=self._source_subfolder)
-        if (self.version == 'ns1-upstream'):
-            git.clone(self.homepage, 'upstream')
-        else:
-            git.clone(self.homepage, 'dev')
+        git.clone(self.homepage, 'upstream')
 
     def build(self):
         with tools.chdir(self._source_subfolder):
