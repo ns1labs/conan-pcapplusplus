@@ -5,7 +5,6 @@ import os
 
 class PcapplusplusConan(ConanFile):
     name = "pcapplusplus"
-    version = "ns1-dev"
     license = "Unlicense"
     description = "PcapPlusPlus is a multiplatform C++ library for capturing, parsing and crafting of network packets"
     topics = ("conan", "pcapplusplus", "pcap", "network", "security", "packet")
@@ -13,13 +12,13 @@ class PcapplusplusConan(ConanFile):
     homepage = "https://github.com/ns1labs/PcapPlusPlus"
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False],
         "immediate_mode": [True, False],
         "with_musl": [True, False],
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True,
         "immediate_mode": False,
         "with_musl": False,
@@ -27,25 +26,25 @@ class PcapplusplusConan(ConanFile):
     generators = "make", "visual_studio"
 
     _source_subfolder = "PcapPlusPlus"
-    
+
     _vs_projects_to_build =[
-        "Common++", 
-        "LightPcapNg", 
-        "Packet++", 
-        "Pcap++", 
+        "Common++",
+        "LightPcapNg",
+        "Packet++",
+        "Pcap++",
     ]
 
     def configure(self):
         if self.settings.os not in ["Windows", "Macos", "Linux"]:
             raise ConanInvalidConfiguration("%s is not supported" % self.settings.os)
-    
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
             del self.options.immediate_mode
         if self.settings.os != 'Linux':
             del self.options.with_musl
-    
+
     def requirements(self):
         if self.settings.os == 'Windows':
             self.requires("winpcap/4.1.3")
@@ -53,10 +52,13 @@ class PcapplusplusConan(ConanFile):
                 self.requires("pthreads4w/3.0.0")
         else:
             self.requires("libpcap/1.9.1")
-            
+
     def source(self):
         git = tools.Git(folder=self._source_subfolder)
-        git.clone(self.homepage, 'dev')
+        if (self.version == 'ns1-upstream'):
+            git.clone(self.homepage, 'upstream')
+        else:
+            git.clone(self.homepage, 'dev')
 
     def build(self):
         with tools.chdir(self._source_subfolder):
@@ -97,15 +99,15 @@ class PcapplusplusConan(ConanFile):
                     vs_version = "vs2019"
 
                 sln_file = "mk/%s/PcapPlusPlus.sln" % (vs_version)
-                winpcap_path = self.deps_cpp_info["winpcap"].rootpath 
+                winpcap_path = self.deps_cpp_info["winpcap"].rootpath
                 pthreads_path = self.deps_cpp_info["pthreads4w"].rootpath
                 self.run("configure-windows-visual-studio.bat --vs-version %s --pcap-sdk %s --pthreads-home %s" % (vs_version, winpcap_path, pthreads_path))
                 self.generate_directory_build_props_file()
                 msbuild = MSBuild(self)
                 msbuild.build(
-                    sln_file, 
+                    sln_file,
                     targets=self._vs_projects_to_build,
-                    use_env=False, 
+                    use_env=False,
                     properties={"WholeProgramOptimization":"None"},
                 )
 
@@ -129,13 +131,13 @@ class PcapplusplusConan(ConanFile):
             self.cpp_info.frameworks.append("SystemConfiguration")
 
     def generate_directory_build_props_file(self):
-    
+
         log_message = (
             "Generating Directory.Build.Props in the build directory which"
             "injects conan variables into all vcxproj files in the directory tree beneath it. "
             "https://docs.microsoft.com/en-us/visualstudio/msbuild/what-s-new-in-msbuild-15-0"
         )
-        
+
         props_content = r"""<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <ImportGroup Label="PropertySheets">
